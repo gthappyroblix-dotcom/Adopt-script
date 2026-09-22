@@ -1,0 +1,349 @@
+-- LocalScript
+-- Помести в StarterPlayer > StarterPlayerScripts
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local mouse = player:GetMouse()
+
+--------------------------------------------------
+-- НАСТРОЙКИ
+--------------------------------------------------
+
+local RARITY_COLORS = {
+	Common = Color3.fromRGB(180, 180, 180),
+	Uncommon = Color3.fromRGB(80, 220, 120),
+	Rare = Color3.fromRGB(80, 150, 255),
+	UltraRare = Color3.fromRGB(170, 80, 255),
+	Legendary = Color3.fromRGB(255, 190, 50)
+}
+
+--------------------------------------------------
+-- GUI
+--------------------------------------------------
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "PetInfoGui"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local shadow = Instance.new("Frame")
+shadow.Size = UDim2.fromOffset(390, 330)
+shadow.Position = UDim2.new(0.5, -195, 1.1, 0)
+shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+shadow.BackgroundTransparency = 0.55
+shadow.BorderSizePixel = 0
+shadow.Visible = false
+shadow.Parent = gui
+
+local shadowCorner = Instance.new("UICorner")
+shadowCorner.CornerRadius = UDim.new(0, 22)
+shadowCorner.Parent = shadow
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.fromOffset(380, 320)
+frame.Position = UDim2.new(0.5, -190, 1.1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(25, 27, 35)
+frame.BorderSizePixel = 0
+frame.Visible = false
+frame.Parent = gui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 22)
+corner.Parent = frame
+
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(80, 83, 100)
+stroke.Transparency = 0.15
+stroke.Parent = frame
+
+--------------------------------------------------
+-- ЗАГОЛОВОК
+--------------------------------------------------
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -80, 0, 42)
+title.Position = UDim2.fromOffset(20, 15)
+title.BackgroundTransparency = 1
+title.Text = "Pet"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 27
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = frame
+
+--------------------------------------------------
+-- КНОПКА ЗАКРЫТИЯ
+--------------------------------------------------
+
+local close = Instance.new("TextButton")
+close.Size = UDim2.fromOffset(38, 38)
+close.Position = UDim2.new(1, -55, 0, 15)
+close.BackgroundColor3 = Color3.fromRGB(55, 58, 70)
+close.Text = "×"
+close.TextColor3 = Color3.fromRGB(255, 255, 255)
+close.TextSize = 27
+close.Font = Enum.Font.GothamBold
+close.Parent = frame
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(1, 0)
+closeCorner.Parent = close
+
+--------------------------------------------------
+-- ПРЕВЬЮ ПИТОМЦА
+--------------------------------------------------
+
+local preview = Instance.new("ViewportFrame")
+preview.Size = UDim2.fromOffset(135, 135)
+preview.Position = UDim2.fromOffset(20, 70)
+preview.BackgroundColor3 = Color3.fromRGB(40, 43, 54)
+preview.BorderSizePixel = 0
+preview.Parent = frame
+
+local previewCorner = Instance.new("UICorner")
+previewCorner.CornerRadius = UDim.new(0, 18)
+previewCorner.Parent = preview
+
+local camera = Instance.new("Camera")
+camera.Parent = preview
+preview.CurrentCamera = camera
+
+--------------------------------------------------
+-- РЕДКОСТЬ
+--------------------------------------------------
+
+local rarity = Instance.new("TextLabel")
+rarity.Size = UDim2.fromOffset(185, 35)
+rarity.Position = UDim2.fromOffset(170, 72)
+rarity.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
+rarity.Text = "Common"
+rarity.TextColor3 = Color3.fromRGB(255, 255, 255)
+rarity.TextSize = 18
+rarity.Font = Enum.Font.GothamBold
+rarity.Parent = frame
+
+local rarityCorner = Instance.new("UICorner")
+rarityCorner.CornerRadius = UDim.new(0, 10)
+rarityCorner.Parent = rarity
+
+--------------------------------------------------
+-- ЦЕНА
+--------------------------------------------------
+
+local priceTitle = Instance.new("TextLabel")
+priceTitle.Size = UDim2.fromOffset(185, 25)
+priceTitle.Position = UDim2.fromOffset(170, 120)
+priceTitle.BackgroundTransparency = 1
+priceTitle.Text = "Стоимость"
+priceTitle.TextColor3 = Color3.fromRGB(170, 173, 185)
+priceTitle.TextSize = 15
+priceTitle.Font = Enum.Font.Gotham
+priceTitle.TextXAlignment = Enum.TextXAlignment.Left
+priceTitle.Parent = frame
+
+local price = Instance.new("TextLabel")
+price.Size = UDim2.fromOffset(185, 38)
+price.Position = UDim2.fromOffset(170, 140)
+price.BackgroundTransparency = 1
+price.Text = "750 Bucks"
+price.TextColor3 = Color3.fromRGB(255, 220, 70)
+price.TextSize = 25
+price.Font = Enum.Font.GothamBold
+price.TextXAlignment = Enum.TextXAlignment.Left
+price.Parent = frame
+
+--------------------------------------------------
+-- НИЖНЯЯ ПАНЕЛЬ
+--------------------------------------------------
+
+local line = Instance.new("Frame")
+line.Size = UDim2.new(1, -40, 0, 1)
+line.Position = UDim2.fromOffset(20, 220)
+line.BackgroundColor3 = Color3.fromRGB(70, 73, 88)
+line.BorderSizePixel = 0
+line.Parent = frame
+
+local info = Instance.new("TextLabel")
+info.Size = UDim2.new(1, -40, 0, 45)
+info.Position = UDim2.fromOffset(20, 235)
+info.BackgroundTransparency = 1
+info.Text = "Нажми на питомца, чтобы посмотреть информацию"
+info.TextColor3 = Color3.fromRGB(175, 178, 190)
+info.TextSize = 14
+info.Font = Enum.Font.Gotham
+info.TextWrapped = true
+info.Parent = frame
+
+--------------------------------------------------
+-- ПРЕВЬЮ МОДЕЛИ
+--------------------------------------------------
+
+local function createPreview(pet)
+	preview:ClearAllChildren()
+
+	camera = Instance.new("Camera")
+	camera.Parent = preview
+	preview.CurrentCamera = camera
+
+	local clone = pet:Clone()
+
+	for _, object in ipairs(clone:GetDescendants()) do
+		if object:IsA("Script")
+			or object:IsA("LocalScript")
+			or object:IsA("ModuleScript") then
+			object:Destroy()
+		end
+	end
+
+	clone.Parent = preview
+
+	if not clone.PrimaryPart then
+		local part = clone:FindFirstChildWhichIsA("BasePart", true)
+
+		if part then
+			clone.PrimaryPart = part
+		end
+	end
+
+	if clone.PrimaryPart then
+		clone:PivotTo(CFrame.new(0, 0, 0))
+
+		camera.CFrame = CFrame.new(
+			Vector3.new(0, 1.5, 6),
+			Vector3.new(0, 1, 0)
+		)
+	end
+end
+
+--------------------------------------------------
+-- ПОКАЗ ОКНА
+--------------------------------------------------
+
+local currentPet = nil
+
+local function showPet(pet)
+
+	if not pet or not pet:IsA("Model") then
+		return
+	end
+
+	local petPrice = pet:GetAttribute("Price")
+	local currency = pet:GetAttribute("Currency") or "Bucks"
+	local petRarity = pet:GetAttribute("Rarity") or "Common"
+
+	if not petPrice then
+		return
+	end
+
+	currentPet = pet
+
+	title.Text = pet.Name
+	price.Text = tostring(petPrice) .. " " .. currency
+	rarity.Text = petRarity
+
+	local rarityColor =
+		RARITY_COLORS[petRarity]
+		or RARITY_COLORS.Common
+
+	rarity.BackgroundColor3 = rarityColor
+
+	createPreview(pet)
+
+	frame.Visible = true
+	shadow.Visible = true
+
+	frame.Position = UDim2.new(0.5, -190, 1.1, 0)
+	shadow.Position = UDim2.new(0.5, -195, 1.1, 0)
+
+	TweenService:Create(
+		frame,
+		TweenInfo.new(
+			0.45,
+			Enum.EasingStyle.Back,
+			Enum.EasingDirection.Out
+		),
+		{
+			Position = UDim2.new(0.5, -190, 0.65, 0)
+		}
+	):Play()
+
+	TweenService:Create(
+		shadow,
+		TweenInfo.new(
+			0.45,
+			Enum.EasingStyle.Back,
+			Enum.EasingDirection.Out
+		),
+		{
+			Position = UDim2.new(0.5, -195, 0.65, 5)
+		}
+	):Play()
+end
+
+--------------------------------------------------
+-- ЗАКРЫТИЕ
+--------------------------------------------------
+
+local function hidePet()
+
+	currentPet = nil
+
+	local tween = TweenService:Create(
+		frame,
+		TweenInfo.new(0.25, Enum.EasingStyle.Quad),
+		{
+			Position = UDim2.new(0.5, -190, 1.1, 0)
+		}
+	)
+
+	local shadowTween = TweenService:Create(
+		shadow,
+		TweenInfo.new(0.25, Enum.EasingStyle.Quad),
+		{
+			Position = UDim2.new(0.5, -195, 1.1, 0)
+		}
+	)
+
+	tween:Play()
+	shadowTween:Play()
+
+	tween.Completed:Connect(function()
+		frame.Visible = false
+		shadow.Visible = false
+	end)
+end
+
+close.MouseButton1Click:Connect(hidePet)
+
+--------------------------------------------------
+-- НАЖАТИЕ НА ПИТОМЦА
+--------------------------------------------------
+
+mouse.Button1Down:Connect(function()
+
+	local target = mouse.Target
+
+	if not target then
+		return
+	end
+
+	local pet = target:FindFirstAncestorOfClass("Model")
+
+	if not pet then
+		return
+	end
+
+	if pet:GetAttribute("Price") then
+		showPet(pet)
+	end
+end)
+
+--------------------------------------------------
+-- ГЛОБАЛЬНЫЕ ФУНКЦИИ
+--------------------------------------------------
+
+_G.ShowPetPrice = showPet
+_G.HidePetPrice = hidePet
